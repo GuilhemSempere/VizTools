@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>PCA results</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="scatter.css">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script type="text/javascript">
+		let metadata = {}, usp = new URLSearchParams(window.location.search), mdUrl = usp.get("metaUrl");
+		let mdConfig = JSON.parse(usp.get("config")), preselectedMdField = mdConfig == null ? null : mdConfig.defaultColorByField.replace("meta_", "");
+		if (mdUrl != null)
+	        $.ajax({
+	            url : mdUrl,
+	            success : function(mdTsv) {
+	            	let individualCol = null, mdFields = [], colsByIndex = {}, mdRows = mdTsv.split("\n");
+	            	mdParsingLoop: for (let i=0; i<mdRows.length; i++) {
+	            		let rowCells = mdRows[i].split("\t");
+	            		for (let j=0; j<rowCells.length; j++) {
+		            		if (i == 0) {
+		            			if (rowCells[j] == "individual")
+		            				individualCol = j;
+		            			else if (preselectedMdField == null || preselectedMdField == rowCells[j]) {
+		            				colsByIndex[j] = rowCells[j];
+		            				$("select#mdFields").append("<option value='" + rowCells[j] + "'>" + rowCells[j] + "</option>");
+		            			}
+		            		}
+		            		else {
+		            			if (individualCol == null) {
+		            				console.log("Unable to parse metadata: no column named 'individual' could be found!");
+		            				break mdParsingLoop;
+		            			}
+
+		            			if (j == individualCol)
+		            				continue;
+		            			
+								let ind = rowCells[individualCol];
+		            			let fieldCol = colsByIndex[j];
+			            		if (metadata[ind] == null)
+			            			metadata[ind] = {};
+			            		metadata[ind][fieldCol] = rowCells[j];
+		            		}
+	            		}
+    					if (rowCells.length > 1)
+        					$("div#metadata").show();
+	            	}
+	            }
+	        });
+        </script>
+    </head>
+    <body>		
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+            <div id="container" class="wrapper">
+			<div id="chartContainer">
+				<span style="margin-left:60px;">Use double-click (or scroll-wheel) to zoom-in, shift + double-click (or scroll-wheel) to zoom-out.</span>
+				<a id="resetLink" href="#">&raquo; Reset &laquo;</a>
+				<div id="chart"></div>
+			</div>
+			<div id="componentSelection" style="display:inline-block; margin-left:20px;"></div>
+			<div id="metadata" style="font-weight:bold; float:right; display:none; margin-right:20px;">
+				Define populations according to
+				<select id="mdFields" onchange="scatter();"></select>
+			</div>
+			<ul style="margin-top:20px;" id="legend" class="clearfix"></ul>
+		</div>
+
+        <script src="scatter.js"></script>	
+		<script type="text/javascript" src="https://d3js.org/d3.v2.min.js"></script>  
+        <script>
+			$(function() {
+				scatter(new URLSearchParams(window.location.search).get("pcaUrl"));
+				$('#resetLink').on('click',function(e){
+					e.preventDefault();
+					xAxisComponent = 1;
+					yAxisComponent = 2;
+					scatter();
+				});
+			});
+        </script>
+    </body>
+</html>

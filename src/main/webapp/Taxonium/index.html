@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Taxonium</title>
+  <meta name="google" content="notranslate">
+  <title>Full Height Div</title>
+  <style>
+      html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+      }
+      body {
+          display: flex;
+      }
+      div#root {
+      		width:100%;
+          flex: 1;
+      }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Include peer dependencies -->
+  <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+
+  <!-- Include Taxonium Component -->
+  <script src="https://unpkg.com/taxonium-component"></script>
+
+  <script type="text/javascript">
+  $.ajax({
+      url : new URLSearchParams(window.location.search).get("treeUrl"),
+      success : function(nwk) {
+                          $.ajax({
+                              url : new URLSearchParams(window.location.search).get("metaUrl"),
+                              success : function(md) {
+                                                        const metadataObj = {
+                                                          filename: "test.csv",
+                                                          data: md,
+                                                          status: "loaded",
+                                                          filetype: "meta_tsv",
+                                                        };
+
+                                                        const sourceDataObj = {
+                                                          status: "loaded",
+                                                          filename: "test.nwk",
+                                                          data: nwk,
+                                                          filetype: "nwk",
+                                                          metadata: metadataObj,
+                                                        };
+
+						                                            ReactDOM.render(
+						                                              React.createElement(Taxonium, { sourceData: sourceDataObj, configDict: JSON.parse(new URLSearchParams(window.location.search).get("config")) }),
+						                                              document.getElementById("root")
+						                                            );
+                              }
+                          });
+      }
+  });
+        </script>
+</body>
+</html>

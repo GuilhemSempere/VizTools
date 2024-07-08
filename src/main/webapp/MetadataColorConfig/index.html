@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Metadata color configurator for online visualization tools</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr@1.8.2/dist/themes/classic.min.css">
+	<meta name="google" content="notranslate">
+  <style>
+	#stringSelector option::before {
+		content: "";
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		margin-right: 5px;
+		margin-top: 2px;
+		border-radius: 50%;
+		border: 1px solid grey;
+		visibility: var(--dot-visibility, visible);
+	}
+	
+	#stringSelector option::before {
+	  background-color: var(--dot-color, black);
+	}
+
+	.pcr-button {
+		visibility: hidden;
+	}
+
+	.pcr-app {
+		top: 155px !important;
+		left: 285px !important;
+		box-shadow: 0 0.15em 1.5em 0 rgba(0,0,0,0.1), 0 0 1em 0 rgba(0,0,0,0.60) !important;
+	}
+
+	.container {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.optionSelector {
+		min-width:200px; 
+		height:350px;
+	}
+
+	.dot {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		margin-right: 5px;
+		margin-top: 2px;
+		border-radius: 50%;
+		border: 1px solid grey;
+	  }
+
+	@media screen and (max-width: 640px) {
+		.container {
+			flex-direction: column;
+		}
+		.optionSelector {
+			width: 100%;
+		}
+		.pcr-app {
+			top: 560px !important;
+			left: 18px !important;
+		}
+	}
+
+  </style>
+</head>
+<body onload="init();" style="background-color: #eeee;">
+  <h1>Metadata color configurator for online visualization tools</h1>
+
+  <div id="mdFileLoadingSection">
+	  <label for="metadataUrl">Metadata file URL:</label>
+	  <br>
+	  <input type="text" id="metadataUrl" onfocus="select();" value="" style="font-size:11px; width:100%;">
+	  <br>
+	  <button style="margin-top:5px;" onclick="fetchFile();">Load</button>
+  </div>
+  
+  <div id="metadataSelection" style="display:none;">
+	  <hr>
+	  <label for="metadataSelector">Metadata column:</label>
+	  <select id="metadataSelector" onchange="assignColorsToMD();"></select>
+  </div>
+  
+  <div id="colorSelection" style="display:none;">
+  	<hr>
+  	<div class="container">
+	  	<div style='margin:10px;'>	
+		<label for="stringSelector">Select field values:</label>
+		<br>
+		<select id="stringSelector" multiple class="optionSelector" onchange="onOptionSelected()"></select>
+		</div>
+		<div style='margin:10px; padding-top:20px; display: flex; flex-direction: column; justify-content: space-between;'>
+			<div style="width:800px;">
+				Main data file URL<span class="taxoniumSpecific"> (optional, for direct display)</span>
+				<input type="text" id="dataUrl" style="font-size:11px; width:100%;" onfocus="select();" value="" onchange="adaptContentsToDataType();">
+				<div style="margin-top:20px; display:none;" id="vizToolInstanceSelector">
+						Visualization tool to work with
+						<select id="visualizationUrl" style="width: 100%; overflow: hidden; text-overflow: ellipsis;"></select>
+				</div>
+				<div style="margin-top:20px;">
+					<button style="margin:5px 0;" onclick="launchVisualization();">Launch visualization with current configuration</button>
+					<br>
+					<input style="margin-left:40px;" type="checkbox" id="openInNewWindow" /> <label for="openInNewWindow">Open in separate window</label>
+				</div>
+			</div>
+			<div id="colorSelectorZone">
+				<div type="text" id="colorSelector"></div>
+			</div>
+		</div>
+	</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr@1.8.2/dist/pickr.min.js"></script>
+  <script>
+    var assignments;
+    var metadata = [];
+    var mdHash;
+    var mainDataParamName;
+
+    function adaptContentsToDataType() {
+	    var dataUrl = document.getElementById("dataUrl").value;
+	    if (dataUrl == null || dataUrl == "")
+	    	return;
+
+			var vizOptions = null, lcUrl = dataUrl.toLowerCase();
+	    if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
+	    	mainDataParamName = "treeUrl";
+	    	vizOptions = ["https://webtools.southgreen.fr/Taxonium", "https://taxonium.org/", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/"];
+	    }
+	    else {
+		    	 	Array.from(document.getElementsByClassName("taxoniumSpecific")).forEach(
+				    function(element, index, array) {
+				    	element.style.display = "none";
+			    	}
+			  );
+				if (lcUrl.endsWith(".pca")) {
+					mainDataParamName = "pcaUrl";
+					vizOptions = ["../PCAplot/"];
+				}
+	    }
+
+	    if (vizOptions == null)
+	    	document.write("Unsupported data type extension for file " + dataUrl);	// end of story
+
+	    var vizSelect = document.getElementById("visualizationUrl");
+	    vizSelect.innerHTML = "";
+	    vizOptions.forEach(function(url) {
+					var option = document.createElement("option");
+					option.text = url;
+					vizSelect.add(option);
+	    });
+	    document.getElementById("vizToolInstanceSelector").style.display = vizSelect.options.length > 1 ? "block" : "none";
+	  }
+
+    function init() {
+    	const urlParams = new URLSearchParams(window.location.search);
+    	const metadataUrl = urlParams.get('metadataUrl'), dataUrl = urlParams.get('dataUrl');
+
+    	if (urlParams.get('debug') != null) {	// for debugging purposes, will be removed at some point
+	  		document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/DIVRICE_NB__497individuals_metadata.tsv"; 
+	  		document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/divrice_nb.nhx"; 
+    	} 
+    	else {
+    		if (metadataUrl != null && metadataUrl.trim().length > 0) {
+	    		document.getElementById("mdFileLoadingSection").style.display = "none";
+	    		document.getElementById("metadataUrl").value = metadataUrl;
+	    		fetchFile();
+	    	}
+	    	if (dataUrl != null && dataUrl.trim().length > 0) {
+	    //		document.getElementById("mdFileLoadingSection").style.display = "none";
+	    		document.getElementById("dataUrl").value = dataUrl;
+	    	//	fetchFile();
+	    	}
+			}
+
+    	adaptContentsToDataType();
+    	if (dataUrl != null && dataUrl.trim() != "" && (metadataUrl == null || metadataUrl.trim() == ""))
+    		launchVisualization();
+    }
+
+    function assignColor(color) {
+      var selectedStrings = Array.from(document.getElementById("stringSelector").selectedOptions).map(option => option.value);
+
+      selectedStrings.forEach(function(string) {
+      	if (color == null)
+      		delete assignments[string];
+      	else
+        	assignments[string] = color.toHEXA().toString();
+      });
+
+      saveToLocalStorage(document.getElementById("metadataSelector").value);
+      updateSelectColors();
+    }
+
+    function saveToLocalStorage(colNumber) {
+      var jsonToSave = localStorage.getItem("taxonium::" + mdHash + "::colorMapping");
+   	  jsonToSave = jsonToSave == null ? {} : JSON.parse(jsonToSave);
+      jsonToSave[colNumber] = assignments;
+      localStorage.setItem("taxonium::" + mdHash + "::colorMapping", JSON.stringify(jsonToSave));
+    }
+
+    function loadFromLocalStorage() {
+      var savedAssignments = localStorage.getItem("taxonium::" + mdHash + "::colorMapping");
+      if (savedAssignments) {
+        assignments = JSON.parse(savedAssignments)[document.getElementById("metadataSelector").value];
+        updateSelectColors();
+      }
+      if (assignments == null)
+    	  assignments = {};
+    }
+	
+	function updateSelectColors() {
+		var options = document.getElementById("stringSelector").options;
+		for (var i = 0; i < options.length; i++) {
+			var string = options[i].value;
+			if (assignments.hasOwnProperty(string)) {
+				options[i].style.setProperty('--dot-color', assignments[string]);
+				options[i].style.setProperty('--dot-visibility', 'visible'); // Afficher le rond
+			} else {
+				options[i].style.removeProperty('--dot-color'); // Supprimer la couleur
+				options[i].style.setProperty('--dot-visibility', 'hidden'); // Cacher le rond
+			}
+		}
+	}
+	
+
+    // Create the color picker instance
+
+	   /* var pickr = Pickr.create({
+      el: '#colorSelector',
+      theme: 'nano',
+      components: {
+        preview: true,
+        opacity: true,
+        hue: true,
+        interaction: {
+          hex: true,
+          rgba: true,
+          input: true,
+          save: true
+        }
+      },
+    });*/
+
+const pickr = Pickr.create({
+    el: '#colorSelector',
+    theme: 'classic',
+    components: {
+        // Main components
+        preview: true,
+        opacity: false,
+        hue: true,
+
+        // Input / output Options
+        interaction: {
+            hex: true,
+            rgb: false,
+            rgba: false,
+            hsla: false,
+            hsva: false,
+            cmyk: false,
+            input: true,
+            clear: true,
+            save: true
+        }
+    }
+});
+
+    pickr.on('save', function(color) {
+      assignColor(color);
+      document.getElementById("stringSelector").value = [];
+      pickr.hide(); // Hide the color picker widget
+    });
+
+    function launchVisualization() {
+    	var mdUrlParams = "";
+    	var mdSelect = document.getElementById("metadataSelector");
+    	if (mdSelect.options.length > 0) {
+    		mdColName = mdSelect.options[mdSelect.selectedIndex].text;
+	    	var jsonConfig = { "colorMapping" : convertToRGB(), "defaultColorByField" : "meta_" + mdColName };
+    		mdUrlParams = "&metaUrl=" + document.getElementById("metadataUrl").value + "&config=" + encodeURIComponent(JSON.stringify(jsonConfig));
+    	}
+    	if (document.getElementById('openInNewWindow').checked)
+    		window.open(document.getElementById("visualizationUrl").value + "?" + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams);
+    	else
+    		location.href = document.getElementById("visualizationUrl").value + "?" + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams;
+    }
+
+    function convertToRGB() {
+      var convertedAssignments = {};
+      for (var key in assignments) {
+        if (assignments.hasOwnProperty(key)) {
+          var color = assignments[key];
+          var rgbColor = hexToRGB(color);
+          convertedAssignments[key] = rgbColor;
+        }
+      }
+
+      return convertedAssignments;
+    }
+
+    function hexToRGB(hex) {
+      var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+      });
+
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [ parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16) ] : null;
+    }
+
+    function fetchFile() {
+    	assignments = {};
+    	document.getElementById("metadataSelection").style.display = "none";
+			document.getElementById("colorSelection").style.display = "none";
+    	
+	    fetch(document.getElementById("metadataUrl").value)
+	      .then(function(response) {
+	    	    if ( response.ok )
+	  	    		return response.text();
+	    	    else
+	    	        alert('Fetching metadata file failed with response code ' + response.status);
+	      })
+	      .then(data => {
+	    	if (typeof data != "undefined") {
+		        var lines = data.split("\n");
+		        var header = null;
+		        var columnNumber = null;
+		        var dataLineCount = 0;
+                var select = document.getElementById("metadataSelector");
+                var isDarwinDonFile = document.getElementById("metadataUrl").value.toLowerCase().trim().endsWith(".don") && lines.length > 0 && lines[0].startsWith("@DARwin");
+
+		        for (var i = 0; i < lines.length; i++) {
+		           if (lines[i].length > 0 && ((!isDarwinDonFile && !lines[i].startsWith("#")) || i >= 2)) {
+			           var columns = lines[i].split(/\t/);
+			           if (header == null) {
+			               header = columns;
+			               select.innerHTML = ""; // Clear existing options
+			               var option = document.createElement("option");
+			               option.text = "--- Please select ---";
+			               option.value = "";
+			               select.appendChild(option);
+			               for (var j = 0; j < columns.length; j++) {
+			                   metadata[j] = new Set();
+			                   option = document.createElement("option");
+			                   option.value = j;
+			                   option.text = columns[j].trim();
+			                   select.appendChild(option);
+			               }
+			           }
+			           else {
+			        		dataLineCount++;
+			           		for (var j = 0; j < columns.length; j++)
+			               		metadata[j].add(columns[j]);
+			           }
+			    	}
+		        }
+		        for (var i=0; i<metadata.length; i++)
+		        	if (dataLineCount == metadata[i].size) {
+			        	console.log("Ignoring column '" + header[i] + "' which contains only unique values (" + metadata[i].size + ")");
+			        	metadata.splice(i, 1);
+			        	header.splice(i, 1);
+		        		select.remove(i + 1);
+		        		for (var j=i+1; j<select.options.length; j++)
+		        			select.options[j].value = parseInt(select.options[j].value) - 1;
+		        		i--;
+			        }
+
+			   	normalizeAndHash(metadata)
+			   	  .then(hash => {
+			   		mdHash = hash;
+			   	 	select.value = localStorage.getItem("taxonium::" + mdHash + "::coloredField");
+			   	    loadFromLocalStorage();
+			   	 	select.onchange();
+			   		document.getElementById("metadataSelection").style.display = "block";
+			   	  })
+			   	  .catch(error => {
+			   	    console.error(error);
+			   	 });
+		  	  }
+	      })
+	      .catch(error => console.log(error));
+	}
+  
+	function assignColorsToMD() {
+		 var select = document.getElementById("stringSelector");
+		 select.innerHTML = ""; // Clear existing options
+
+		 loadFromLocalStorage();
+		 
+		 var colNumber = document.getElementById("metadataSelector").value;
+		 localStorage.setItem("taxonium::" + mdHash + "::coloredField", colNumber);
+		 if (colNumber == "") {
+			 document.getElementById("colorSelection").style.display = "none";
+		 	 return;
+		 }
+
+		 document.getElementById("colorSelection").style.display = "block";
+		 
+		 if (metadata[parseInt(colNumber)] == null)
+			 return;	// this is a skipped column
+		 
+		 [...metadata[parseInt(colNumber)]].sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'})).forEach(function(mdVal) {
+		   var option = document.createElement("option");
+		   option.value = mdVal;
+		   option.text = mdVal;
+		   select.appendChild(option);
+		 });
+		
+		 // Update select colors and save to local storage
+		 updateSelectColors();
+	}
+
+	async function normalizeAndHash(obj) {
+	  const sortedKeys = Object.keys(obj).sort();
+	  const normalizedJSON = JSON.stringify(Array.from(obj, set => [...set].sort()), sortedKeys);
+
+	  const utf8Encoder = new TextEncoder();
+	  const data = utf8Encoder.encode(normalizedJSON);
+
+	  if (crypto.subtle == null)
+	  	  return adler32(data.toString());	// use workaround
+
+	  const buffer = await crypto.subtle.digest('SHA-256', data);
+	  const hashArray = Array.from(new Uint8Array(buffer));
+	  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+	  return hashHex;
+	}
+
+	function onOptionSelected() {
+		document.querySelector('.pcr-button').click();
+	}
+
+  function adler32(str) {
+      const MOD_ADLER = 65521;
+      let a = 1, b = 0;
+
+      for (let i = 0; i < str.length; i++) {
+          a = (a + str.charCodeAt(i)) % MOD_ADLER;
+          b = (b + a) % MOD_ADLER;
+      }
+      return (b << 16) | a;
+  }
+  </script>
+</body>
+</html>

@@ -100,7 +100,7 @@
 						<select id="visualizationUrl" style="width: 100%; overflow: hidden; text-overflow: ellipsis;"></select>
 				</div>
 				<div style="margin-top:20px;">
-					<button style="margin:5px 0;" onclick="launchVisualization();">Launch visualization with current configuration</button>
+					<button style="margin:5px 0;" id="launchViz" onclick="launchVisualization();">Launch visualization with current configuration</button>
 					<br>
 					<input style="margin-left:40px;" type="checkbox" id="openInNewWindow" /> <label for="openInNewWindow">Open in separate window</label>
 				</div>
@@ -120,15 +120,24 @@
     var mainDataParamName;
 
     function adaptContentsToDataType() {
+    	var vizUrlSelect = document.getElementById("visualizationUrl"), vizUrlWithoutUploadInterface = vizUrlSelect == null ? null : Array.from(vizUrlSelect.options).find(option => option.text.startsWith("https://webtools"));
 	    var dataUrl = document.getElementById("dataUrl").value;
-	    if (dataUrl == null || dataUrl == "")
+	    if (dataUrl == null || dataUrl.trim() == "") {
+	    	if (vizUrlWithoutUploadInterface != null) {
+	    		vizUrlWithoutUploadInterface.style.display = "none";
+	    		if (vizUrlWithoutUploadInterface.selected)
+				 		vizUrlSelect.value = Array.from(vizUrlSelect.options).find(option => !option.hidden).value;
+	    	}
 	    	return;
-
-			var vizOptions = null, lcUrl = dataUrl.toLowerCase();
-	    if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
-	    	mainDataParamName = "treeUrl";
-	    	vizOptions = ["https://webtools.southgreen.fr/Taxonium", "https://taxonium.org/", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/"];
 	    }
+
+    	if (vizUrlWithoutUploadInterface != null)
+				vizUrlWithoutUploadInterface.style.display = "block";
+			var vizOptions = null, lcUrl = dataUrl.toLowerCase();
+			if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
+				mainDataParamName = "treeUrl";
+				vizOptions = ["https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/", "https://webtools.southgreen.fr/Taxonium"];
+			}
 	    else {
 		    	 	Array.from(document.getElementsByClassName("taxoniumSpecific")).forEach(
 				    function(element, index, array) {
@@ -141,17 +150,19 @@
 				}
 	    }
 
-	    if (vizOptions == null)
-	    	document.write("Unsupported data type extension for file " + dataUrl);	// end of story
-
 	    var vizSelect = document.getElementById("visualizationUrl");
 	    vizSelect.innerHTML = "";
-	    vizOptions.forEach(function(url) {
-					var option = document.createElement("option");
-					option.text = url;
-					vizSelect.add(option);
-	    });
+	    if (vizOptions == null)
+	    	alert("Unsupported data type extension for file " + dataUrl);
+			else
+		    vizOptions.forEach(function(url) {
+						var option = document.createElement("option");
+						option.text = url;
+						vizSelect.add(option);
+		    });
 	    document.getElementById("vizToolInstanceSelector").style.display = vizSelect.options.length > 1 ? "block" : "none";
+
+    	document.getElementById("launchViz").disabled = vizOptions == null;
 	  }
 
     function init() {
@@ -159,8 +170,8 @@
     	const metadataUrl = urlParams.get('metadataUrl'), dataUrl = urlParams.get('dataUrl');
 
     	if (urlParams.get('debug') != null) {	// for debugging purposes, will be removed at some point
-	  		document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/DIVRICE_NB__497individuals_metadata.tsv"; 
-	  		document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/divrice_nb.nhx"; 
+	  		document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/TaxoniumColors/DIVRICE_NB__497individuals_metadata.tsv"; 
+	  		document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/TaxoniumColors/divrice_nb.nhx"; 
     	} 
     	else {
     		if (metadataUrl != null && metadataUrl.trim().length > 0) {

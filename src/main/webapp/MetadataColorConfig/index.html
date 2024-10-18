@@ -291,7 +291,7 @@ const pickr = Pickr.create({
     	if (mdSelect.options.length > 0) {
     		mdColName = mdSelect.options[mdSelect.selectedIndex].text;
 	    	var jsonConfig = { "colorMapping" : convertToRGB(), "defaultColorByField" : "meta_" + mdColName };
-    		mdUrlParams = "&metaUrl=" + document.getElementById("metadataUrl").value + "&config=" + encodeURIComponent(JSON.stringify(jsonConfig));
+    		mdUrlParams = "&metaUrl=" + document.getElementById("metadataUrl").value + (Object.keys(jsonConfig.colorMapping).length == 0 ? "" : ("&config=" + encodeURIComponent(JSON.stringify(jsonConfig))));
     	}
     	if (document.getElementById('openInNewWindow').checked)
     		window.open(document.getElementById("visualizationUrl").value + "?" + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams);

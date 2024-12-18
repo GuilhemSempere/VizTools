@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html class="no-js">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -55,36 +52,37 @@
         </script>
     </head>
     <body>		
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
-
-            <div id="container" class="wrapper">
-			<div id="chartContainer">
-				<span style="margin-left:60px;">Use double-click (or scroll-wheel) to zoom-in, shift + double-click (or scroll-wheel) to zoom-out.</span>
-				<a id="resetLink" href="#">&raquo; Reset &laquo;</a>
-				<div id="chart"></div>
-			</div>
-			<div id="componentSelection" style="display:inline-block; margin-left:20px;"></div>
-			<div id="metadata" style="font-weight:bold; float:right; display:none; margin-right:20px;">
-				Define populations according to
-				<select id="mdFields" onchange="scatter();"></select>
-			</div>
-			<ul style="margin-top:20px;" id="legend" class="clearfix"></ul>
-		</div>
+        <div id="container" class="wrapper">
+            <div class="instruction-wrapper">
+                <span>Use double-click (or scroll-wheel) to zoom-in, shift + double-click (or scroll-wheel) to zoom-out.</span>
+                <a id="resetLink" href="#">&raquo; Reset &laquo;</a>
+            </div>
+            <div id="chartContainer">
+                <div id="chart"></div>
+                <div id="rightPanel">
+                    <div id="componentSelection"></div>
+                    <div id="metadata" style="font-weight:bold; display:none; margin-top:10px;">
+                        Define populations regarding<br>
+						<center><select id="mdFields" onchange="scatter();"></select></center>
+                    </div>
+                    <ul id="legend" class="clearfix"></ul>
+                </div>
+            </div>
+        </div>
 
         <script src="scatter.js"></script>	
-		<script type="text/javascript" src="https://d3js.org/d3.v2.min.js"></script>  
+        <script type="text/javascript" src="https://d3js.org/d3.v2.min.js"></script>  
         <script>
-			$(function() {
-				scatter(new URLSearchParams(window.location.search).get("pcaUrl"));
-				$('#resetLink').on('click',function(e){
-					e.preventDefault();
-					xAxisComponent = 1;
-					yAxisComponent = 2;
-					scatter();
-				});
-			});
+            $(function() {
+                scatter(new URLSearchParams(window.location.search).get("pcaUrl"));
+                $('#resetLink').on('click',function(e){
+                    e.preventDefault();
+                    xAxisComponent = 1;
+                    yAxisComponent = 2;
+                    scatter();
+                });
+            });
         </script>
     </body>
 </html>
+

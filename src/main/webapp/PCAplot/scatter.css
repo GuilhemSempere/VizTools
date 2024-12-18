@@ -18,9 +18,11 @@ textarea {
     color: #222;
 }
 
-html {
-  overflow-x: hidden;
-  overflow-y: auto;
+html, body {
+	overflow: hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -123,8 +125,9 @@ body {
 	color:#59595b;
 }
 .wrapper {
-#	width:960px;
-	margin:0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 		a.major {
@@ -294,9 +297,9 @@ body {
 					fill:#6d7021;
 				}
 		#resetLink {
-			right:0;
+			right:20px;
 			padding-left:19px;
-			margin-top:30px;
+			margin-top:40px;
 			font-weight:bold;
 		}
 		#resetLink:hover {
@@ -304,8 +307,15 @@ body {
 		}
 		
 	#chartContainer {
-		position:relative;
-		clear:both;
+		position: relative;
+		clear: both;
+		display: flex;
+		flex-direction: row;
+		align-items: stretch;
+		width: 100%;
+		height: calc(100vh - 100px); /* Adjust this value based on the height of your header/footer */
+		padding: 0 20px;
+		box-sizing: border-box;
 	}
 	
 	.tooltip {
@@ -315,27 +325,6 @@ body {
 		padding:1px;
 		pointer-events: none;
 	}
-	
-	
-/* 		#tooltip { */
-/* 			position:absolute; */
-/* 			top:1px; */
-/* 			right:0; */
-/* 			padding:15px 20px; */
-/* 			width:30%; */
-/* 			background:rgba(254,253,245,0.8); */
-/* 			color:#616143; */
-/* 			height:418px; */
-/* 			z-index:1; */
-/* 			text-shadow:0 -1px 1px rgba(255,255,255,0.6); */
-/* 			-moz-box-shadow:1px 0 0 rgba(0,0,0,0.02) inset; */
-/* 			-webkit-box-shadow:1px 0 0 rgba(0,0,0,0.05) inset; */
-/* 			-o-box-shadow:1px 0 0 rgba(0,0,0,0.02) inset; */
-/* 			box-shadow:1px 0 0 rgba(0,0,0,0.05) inset; */
-/* 		} */
-/* 		#tooltip.leftPos { */
-/* 			left:60px; */
-/* 		} */
 			#name {
 				font-size:20px;
 				margin:0 0 5px;
@@ -373,13 +362,15 @@ body {
 						font-size:13px;
 					}
 		#chart {
-			min-height:500px;
+			flex: 1;
+			height: 100%;
+			min-height: 400px;
 		}
 		svg {
 			font-family:'Trade Gothic Next W01',sans-serif;
-			/*background:rgba(255,255,255,0.3);
-			border:1px solid rgba(255,255,255,0.6);*/
 			position:relative;
+			width: 100%;
+			height: 100%;
 		}
 			path {
 				stroke:red;
@@ -400,14 +391,6 @@ body {
 					font-size: 13px;
 					fill: #666;
 				}
-/* 			.objects { */
-/* 				cursor:move; */
-/* 			} */
-				/*.objects:hover .lineMed {
-					stroke:red;
-					stroke-dasharray:5,5;
-					stroke-width:3px;
-				}*/
 				.axisLine {
 					shape-rendering: crispEdges;
 					stroke:rgba(0,0,0,0.2);
@@ -482,21 +465,23 @@ body {
 			text-decoration:none;
 		}
 	#legend {
-		margin:0;
-		padding:10px 0 15px;
-		list-style:none;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
 	}
 		#legend li {
-			cursor: pointer; cursor: hand;
-			min-width:25px;
-			float:left;
-			padding:2px;
-			margin:1px 3px;
-			font-size:12px;
+			cursor: pointer;
+			min-width: 30px;
+			max-width: 60px;
+			padding: 2px;
+			margin: 0 0 7px 7px;
+			font-size: 12px;
 			background-color: #f0f0f0;
-			margin-left:2px;
-			border:1px dashed #aaa;
-			background-color:#fbfbfb;
+			border: 1px dashed #aaa;
+			background-color: #fbfbfb;
+			text-align: center;
 		}
 		
 		#legend li.selected {
@@ -508,13 +493,8 @@ body {
 		}
 		
 		#legend li circle {
-			cursor: pointer; cursor: hand;
+			cursor: pointer;
 		}
-		
-		/*#legend .high {background:#9d3d38;}
-		#legend .medium {background:#ca7b43;}
-		#legend .low {background:#f9b743;}
-		#legend .negative {background:#9bd6d7;}*/
 		#legend li svg {
 			margin:0 3px 0 0;
 			position:relative;
@@ -542,6 +522,23 @@ body {
 		#sources p {
 			font-size:14px;
 		}
+
+#rightPanel {
+    max-width: 10%;
+    min-width: 230px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background-color:#f0f0f0;
+}
+
+#componentSelection, #metadata {
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
 
 /* ==========================================================================
    Fonts list: for reference only. Switch from first list to second on publish:
@@ -765,3 +762,14 @@ rasmussen fonts-list {
         page-break-after: avoid;
     }
 }
+
+.instruction-wrapper {
+	margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0 20px;
+}
+
+.instruction-wrapper span {
+    margin-right: 20px;
+}
+

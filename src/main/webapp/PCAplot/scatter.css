@@ -495,8 +495,7 @@ body {
 			cursor: pointer;
 		}
 		#legend li svg {
-			margin:0 3px 0 0;
-			position:absolute;
+			margin:0 3px -4px 0;
 			width:16px;
 			height:16px;
 		}

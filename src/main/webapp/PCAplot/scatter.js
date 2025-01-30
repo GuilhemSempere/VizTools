@@ -315,6 +315,14 @@ var scatter = function(inputFile) {
         }
         d3.select("#legend").html(assignedPopLegendItems + refPopLegendItems);
 
+		// Display component selectors
+		var xComponentOptions = "", yComponentOptions = "";
+		for (var key in dataColumns) {
+			xComponentOptions += '<option value="' + key + '"' + (key == xAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
+			yComponentOptions += '<option value="' + key + '"' + (key == yAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
+		}
+        d3.select("#componentSelection").html("<b>Displayed components:</b><br>X-axis <select id='xAxisComponent' onchange='xAxisComponent=options[selectedIndex].value; scatter();'>" + xComponentOptions + "</select><br>Y-axis <select id='yAxisComponent' onchange='yAxisComponent=options[selectedIndex].value; scatter();'>" + yComponentOptions + "</select>");
+
         // Update zoom function to handle both paths and circles
         function zoom() {
             svg.select(".x.axis").call(xAxis);

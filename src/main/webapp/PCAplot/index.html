@@ -23,9 +23,10 @@
 		            		if (i == 0) {
 		            			if (rowCells[j] == "individual")
 		            				individualCol = j;
-		            			else if (preselectedMdField == null || preselectedMdField == rowCells[j]) {
+		            			else {
 		            				colsByIndex[j] = rowCells[j];
-		            				$("select#mdFields").append("<option value='" + rowCells[j] + "'>" + rowCells[j] + "</option>");
+									if (preselectedMdField == null || preselectedMdField == rowCells[j])
+		            					$("select#mdFields").append("<option value='" + rowCells[j] + "'>" + rowCells[j] + "</option>");
 		            			}
 		            		}
 		            		else {

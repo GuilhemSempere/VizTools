@@ -474,7 +474,6 @@ body {
 		#legend li {
 			cursor: pointer;
 			min-width: 30px;
-			max-width: 60px;
 			padding: 2px;
 			margin: 0 0 7px 7px;
 			font-size: 12px;
@@ -497,8 +496,9 @@ body {
 		}
 		#legend li svg {
 			margin:0 3px 0 0;
-			position:relative;
-			top:4px;
+			position:absolute;
+			width:16px;
+			height:16px;
 		}
 		#legend .inactive {
 			opacity:0.4;

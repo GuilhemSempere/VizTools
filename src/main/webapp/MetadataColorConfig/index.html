@@ -403,7 +403,7 @@
                         }
                     }
                     for (var i = 0; i < metadata.length; i++)
-                        if (dataLineCount == metadata[i].size) {
+                        if (i == 0 && dataLineCount == metadata[i].size) {
                             console.log("Ignoring column '" + header[i] + "' which contains only unique values (" + metadata[i].size + ")");
                             metadata.splice(i, 1);
                             header.splice(i, 1);

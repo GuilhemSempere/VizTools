@@ -90,6 +90,10 @@
         <label for="stringSelector">Select field values:</label>
         <br>
         <select id="stringSelector" multiple class="optionSelector" onchange="onOptionSelected()"></select>
+		<br>
+		<div style="margin-top:10px;">
+		  <button onclick="assignRandomColors()">Assign random colors to all values</button>
+		</div>
       </div>
       <div style='margin:10px; padding-top:20px; display: flex; flex-direction: column; justify-content: space-between;'>
         <div style="width:800px;"> Main data file URL <span class="taxoniumSpecific"> (optional, for direct display)</span>
@@ -140,7 +144,7 @@
             lcUrl = dataUrl.toLowerCase();
         if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
             mainDataParamName = "treeUrl";
-            vizOptions = ["https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/", "https://webtools.southgreen.fr/Taxonium"];
+            vizOptions = ["https://webtools.southgreen.fr/Taxonium", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/"];
         } else {
             Array.from(document.getElementsByClassName("taxoniumSpecific")).forEach(
                 function(element, index, array) {
@@ -174,8 +178,8 @@
             dataUrl = urlParams.get('dataUrl');
 
         if (urlParams.get('debug') != null) { // for debugging purposes, will be removed at some point
-            document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/TaxoniumColors/DIVRICE_NB__497individuals_metadata.tsv";
-            document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/TaxoniumColors/divrice_nb.nhx";
+            document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/DIVRICE_NB__497individuals_metadata.tsv";
+            document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/divrice_nb.nhx";
         } else {
             if (metadataUrl != null && metadataUrl.trim().length > 0) {
                 document.getElementById("mdFileLoadingSection").style.display = "none";
@@ -235,6 +239,19 @@
             }
         }
     }
+
+	function assignRandomColors() {
+	    const select = document.getElementById("stringSelector");
+	    if (!select) return;
+
+	    Array.from(select.options).forEach(option => {
+	        const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+	        assignments[option.value] = randomColor;
+	    });
+
+	    saveToLocalStorage(document.getElementById("mdSelectorForColor").value);
+	    updateSelectColors();
+	}
 
 
     // Create the color picker instance

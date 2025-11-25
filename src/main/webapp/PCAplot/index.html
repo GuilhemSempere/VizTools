@@ -21,7 +21,7 @@
 	            		let rowCells = mdRows[i].split("\t");
 	            		for (let j=0; j<rowCells.length; j++) {
 		            		if (i == 0) {
-		            			if (rowCells[j] == "individual")
+								if (rowCells[j] == "sample" || rowCells[j] == "individual")
 		            				individualCol = j;
 		            			else {
 		            				colsByIndex[j] = rowCells[j];

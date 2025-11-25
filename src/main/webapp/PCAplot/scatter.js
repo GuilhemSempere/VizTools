@@ -217,16 +217,26 @@ var scatter = function(inputFile) {
             .enter()
             .append("path")
             .attr("d", function(d) {
-				if (mdConfig != null)
-					return shapes['circle'](3);
+                if (mdConfig != null)
+                    return shapes['circle'](3);
 
-				// Use paths with different shapes when no mdConfig
+                // Use paths with different shapes when no mdConfig
                 let mdClass = getMetadataClass(getIndividualMetadata(d[0]));
                 let classKeys = Object.keys(classes);
                 let classIndex = classKeys.indexOf(mdClass);
+                
+                // Ensure we have a valid shape index
                 let shapeIndex = Math.floor(classIndex / 20);
-                let shapeFn = shapes[shapeKeys[shapeIndex % shapeKeys.length]];
-                shapeByClass[mdClass] = shapeKeys[shapeIndex % shapeKeys.length];
+                let shapeKey = shapeKeys[shapeIndex % shapeKeys.length];
+                let shapeFn = shapes[shapeKey];
+                
+                // Fallback to circle if shapeFn is not a function
+                if (typeof shapeFn !== 'function') {
+                    shapeFn = shapes['circle'];
+                    shapeKey = 'circle';
+                }
+                
+                shapeByClass[mdClass] = shapeKey;
                 return shapeFn(3);
             })
             .attr("fill", function(d) {
@@ -234,29 +244,29 @@ var scatter = function(inputFile) {
                 let fillColor = color(mdClass);
                 return fillColor;
             })
-			.style("stroke", function(d) {
+            .style("stroke", function(d) {
                 let mdClass = getMetadataClass(getIndividualMetadata(d[0]));
                 return color(mdClass) == null || isAssignedPop(mdClass) ? 'black' : 'white';
-			})
+            })
             .attr("class", function(d) {
                 return "dot_" + getMetadataClass(getIndividualMetadata(d[0]));
             })
             .attr("transform", function(d) {
                 return "translate("+x(rotateChart ? -d[xAxisComponent] : d[xAxisComponent])+","+y(rotateChart ? -d[yAxisComponent] : d[yAxisComponent])+")";
             })
-	        .on("mouseover", (d) => {
-	          var tooltipContent = "<div style='background-color:#eee; padding:5px; border-radius:5px'><b>" + d[individualVar] + "</b>";
-	          if (metadata[d[0]])
-	            for (var key in metadata[d[0]])
-	            	if (metadata[d[0]][key])
-	    	          	tooltipContent += "<br>" + key + ": " + metadata[d[0]][key];
+            .on("mouseover", (d) => {
+              var tooltipContent = "<div style='background-color:#eee; padding:5px; border-radius:5px'><b>" + d[individualVar] + "</b>";
+              if (metadata[d[0]])
+                for (var key in metadata[d[0]])
+                    if (metadata[d[0]][key])
+                        tooltipContent += "<br>" + key + ": " + metadata[d[0]][key];
 
-	          tooltip.transition().duration(150).style("opacity", 0.85);
-	          tooltip
-	            .html(tooltipContent + "</div>")
-	            .style("left", d3.event.pageX + 10 + "px")
-	            .style("top", d3.event.pageY + 10 + "px");
-	        })
+              tooltip.transition().duration(150).style("opacity", 0.85);
+              tooltip
+                .html(tooltipContent + "</div>")
+                .style("left", d3.event.pageX + 10 + "px")
+                .style("top", d3.event.pageY + 10 + "px");
+            })
             .on("mouseout", function(d) {
                 tooltip.transition()
                 .duration(500)
@@ -287,7 +297,13 @@ var scatter = function(inputFile) {
             let classKeys = Object.keys(classes).sort();
             for (let i = 1; i <= classKeys.length; i++) {
                 let key = "group" + i;
-                let shapeFn = shapes[shapeByClass[key]];
+                let shapeKey = shapeByClass[key];
+                let shapeFn = shapes[shapeKey];
+                // Fallback for legend too
+                if (typeof shapeFn !== 'function') {
+                    shapeFn = shapes['circle'];
+                    shapeKey = 'circle';
+                }
                 var fIsAssignedPop = isAssignedPop(key);
                 var stringToAppend = '<li style="padding-left:20px; text-align:left; border-width:3px; border-color:' + 
                     color(key) + ';" class="selected' + (fIsAssignedPop ? ' assignedPop' : '') + 
@@ -302,25 +318,25 @@ var scatter = function(inputFile) {
                     refPopLegendItems += stringToAppend;
             }
         } else {
-	        var assignedPopLegendItems = "", refPopLegendItems = "";
-	        for (const [key, value] of Object.entries(groupClasses).sort())
-	            if (value != "") {
-	                var fIsAssignedPop = isAssignedPop(value);
-	                var stringToAppend = '<li style="text-align:center; border-width:3px; border-color:' + color(value) + ';" class="selected' + (fIsAssignedPop ? ' assignedPop' : '') + '" id="dot_' + value + '" onclick="toggleClassDisplay(this);" title="Click to show/hide ' + (fIsAssignedPop ? 'assigned ' : '') + 'population">' + (key == '' ? '&nbsp;' : key) + '</li>';
-	                if (fIsAssignedPop)
-	                    assignedPopLegendItems += stringToAppend;
-	                else
-	                    refPopLegendItems += stringToAppend;
-	            }
+            var assignedPopLegendItems = "", refPopLegendItems = "";
+            for (const [key, value] of Object.entries(groupClasses).sort())
+                if (value != "") {
+                    var fIsAssignedPop = isAssignedPop(value);
+                    var stringToAppend = '<li style="text-align:center; border-width:3px; border-color:' + color(value) + ';" class="selected' + (fIsAssignedPop ? ' assignedPop' : '') + '" id="dot_' + value + '" onclick="toggleClassDisplay(this);" title="Click to show/hide ' + (fIsAssignedPop ? 'assigned ' : '') + 'population">' + (key == '' ? '&nbsp;' : key) + '</li>';
+                    if (fIsAssignedPop)
+                        assignedPopLegendItems += stringToAppend;
+                    else
+                        refPopLegendItems += stringToAppend;
+                }
         }
         d3.select("#legend").html(assignedPopLegendItems + refPopLegendItems);
 
-		// Display component selectors
-		var xComponentOptions = "", yComponentOptions = "";
-		for (var key in dataColumns) {
-			xComponentOptions += '<option value="' + key + '"' + (key == xAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
-			yComponentOptions += '<option value="' + key + '"' + (key == yAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
-		}
+        // Display component selectors
+        var xComponentOptions = "", yComponentOptions = "";
+        for (var key in dataColumns) {
+            xComponentOptions += '<option value="' + key + '"' + (key == xAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
+            yComponentOptions += '<option value="' + key + '"' + (key == yAxisComponent ? " selected" : "") + '>Component ' + dataColumns[key] + '</option>';
+        }
         d3.select("#componentSelection").html("<b>Displayed components:</b><br>X-axis <select id='xAxisComponent' onchange='xAxisComponent=options[selectedIndex].value; scatter();'>" + xComponentOptions + "</select><br>Y-axis <select id='yAxisComponent' onchange='yAxisComponent=options[selectedIndex].value; scatter();'>" + yComponentOptions + "</select>");
 
         // Update zoom function to handle both paths and circles

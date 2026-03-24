@@ -67,7 +67,7 @@
   </style>
 </head>
 <body onload="init();" style="background-color: #eeee;">
-  <h1>Metadata color configurator for online visualization tools</h1>
+  <h1>Metadata color configurator for online visualization<span id="titleTypeInfo"></span></h1>
 
   <div id="mdFileLoadingSection">
 	  <label for="metadataUrl">Metadata file URL:</label>
@@ -127,7 +127,8 @@
 
     function adaptContentsToDataType() {
         var vizUrlSelect = document.getElementById("visualizationUrl"),
-            vizUrlWithoutUploadInterface = vizUrlSelect == null ? null : Array.from(vizUrlSelect.options).find(option => option.text.startsWith("https://webtools"));
+            vizUrlWithoutUploadInterface = vizUrlSelect == null ? null : Array.from(vizUrlSelect.options).find(option => option.text.startsWith("../"));
+
         var dataUrl = document.getElementById("dataUrl").value;
         if (dataUrl == null || dataUrl.trim() == "") {
             if (vizUrlWithoutUploadInterface != null) {
@@ -142,9 +143,15 @@
             vizUrlWithoutUploadInterface.style.display = "block";
         var vizOptions = null,
             lcUrl = dataUrl.toLowerCase();
-        if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
+        let dataTypeSpanText = "";
+        if (lcUrl.endsWith(".mtx")) {
+            mainDataParamName = "matrixUrl";
+            vizOptions = ["../DistanceMatrix/"];
+            dataTypeSpanText = ": Distance matrix heatmap";
+        } else if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
             mainDataParamName = "treeUrl";
-            vizOptions = ["https://webtools.southgreen.fr/Taxonium", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/"];
+            vizOptions = ["../Taxonium", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/"];
+            dataTypeSpanText = ": Tree viewer (Taxonium)";
         } else {
             Array.from(document.getElementsByClassName("taxoniumSpecific")).forEach(
                 function(element, index, array) {
@@ -155,7 +162,9 @@
                 mainDataParamName = "pcaUrl";
                 vizOptions = ["../PCAplot/"];
             }
+            dataTypeSpanText = ": PCA plot";
         }
+        document.getElementById("titleTypeInfo").innerHTML = dataTypeSpanText;
 
         var vizSelect = document.getElementById("visualizationUrl");
         vizSelect.innerHTML = "";
@@ -178,8 +187,8 @@
             dataUrl = urlParams.get('dataUrl');
 
         if (urlParams.get('debug') != null) { // for debugging purposes, will be removed at some point
-            document.getElementById("metadataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/DIVRICE_NB__497individuals_metadata.tsv";
-            document.getElementById("dataUrl").value = "https://webtools.southgreen.fr/MetadataColorConfig/divrice_nb.nhx";
+            document.getElementById("metadataUrl").value = "../MetadataColorConfig/DIVRICE_NB__497individuals_metadata.tsv";
+            document.getElementById("dataUrl").value = "../MetadataColorConfig/divrice_nb.nhx";
         } else {
             if (metadataUrl != null && metadataUrl.trim().length > 0) {
                 document.getElementById("mdFileLoadingSection").style.display = "none";

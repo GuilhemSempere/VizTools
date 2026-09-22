@@ -3,66 +3,66 @@
 <head>
   <title>Metadata color configurator for online visualization tools</title>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr@1.8.2/dist/themes/classic.min.css">
-	<meta name="google" content="notranslate">
+    <meta name="google" content="notranslate">
   <style>
-	#stringSelector option::before {
-		content: "";
-		display: inline-block;
-		width: 10px;
-		height: 10px;
-		margin-right: 5px;
-		margin-top: 2px;
-		border-radius: 50%;
-		border: 1px solid grey;
-		visibility: var(--dot-visibility, visible);
-	}
-	
-	#stringSelector option::before {
-	  background-color: var(--dot-color, black);
-	}
+    #stringSelector option::before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        margin-top: 2px;
+        border-radius: 50%;
+        border: 1px solid grey;
+        visibility: var(--dot-visibility, visible);
+    }
+    
+    #stringSelector option::before {
+      background-color: var(--dot-color, black);
+    }
 
-	.pcr-button {
-		visibility: hidden;
-	}
+    .pcr-button {
+        visibility: hidden;
+    }
 
-	.pcr-app {
-		top: 155px !important;
-		left: 285px !important;
-		box-shadow: 0 0.15em 1.5em 0 rgba(0,0,0,0.1), 0 0 1em 0 rgba(0,0,0,0.60) !important;
-	}
+    .pcr-app {
+        top: 155px !important;
+        left: 285px !important;
+        box-shadow: 0 0.15em 1.5em 0 rgba(0,0,0,0.1), 0 0 1em 0 rgba(0,0,0,0.60) !important;
+    }
 
-	.container {
-		display: flex;
-		flex-direction: row;
-	}
+    .container {
+        display: flex;
+        flex-direction: row;
+    }
 
-	.optionSelector {
-		min-width:200px; 
-		height:350px;
-	}
+    .optionSelector {
+        min-width:200px; 
+        height:350px;
+    }
 
-	.dot {
-		display: inline-block;
-		width: 10px;
-		height: 10px;
-		margin-right: 5px;
-		margin-top: 2px;
-		border-radius: 50%;
-		border: 1px solid grey;
-	  }
+    .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        margin-top: 2px;
+        border-radius: 50%;
+        border: 1px solid grey;
+      }
 
-	@media screen and (max-width: 640px) {
-		.container {
-			flex-direction: column;
-		}
-		.optionSelector {
-			width: 100%;
-		}
-		.pcr-app {
-			top: 560px !important;
-			left: 18px !important;
-		}
-	}
+    @media screen and (max-width: 640px) {
+        .container {
+            flex-direction: column;
+        }
+        .optionSelector {
+            width: 100%;
+        }
+        .pcr-app {
+            top: 560px !important;
+            left: 18px !important;
+        }
+    }
 
   </style>
 </head>
@@ -70,17 +70,17 @@
   <h1>Metadata color configurator for online visualization<span id="titleTypeInfo"></span></h1>
 
   <div id="mdFileLoadingSection">
-	  <label for="metadataUrl">Metadata file URL:</label>
-	  <br>
-	  <input type="text" id="metadataUrl" onfocus="select();" value="" style="font-size:11px; width:100%;">
-	  <br>
-	  <button style="margin-top:5px;" onclick="fetchFile();">Load</button>
+      <label for="metadataUrl">Metadata file URL:</label>
+      <br>
+      <input type="text" id="metadataUrl" onfocus="select();" value="" style="font-size:11px; width:100%;">
+      <br>
+      <button style="margin-top:5px;" onclick="fetchFile();">Load</button>
   </div>
   
   <div id="metadataSelection" style="display:none;">
-	  <hr>
-	  <label for="mdSelectorForColor">Metadata column:</label>
-	  <select id="mdSelectorForColor" onchange="assignColorsToMD();"></select>
+      <hr>
+      <label for="mdSelectorForColor">Metadata column:</label>
+      <select id="mdSelectorForColor" onchange="assignColorsToMD();"></select>
   </div>
   
   <div id="colorSelection" style="display:none;">
@@ -90,10 +90,10 @@
         <label for="stringSelector">Select field values:</label>
         <br>
         <select id="stringSelector" multiple class="optionSelector" onchange="onOptionSelected()"></select>
-		<br>
-		<div style="margin-top:10px;">
-		  <button onclick="assignRandomColors()">Assign random colors to all values</button>
-		</div>
+        <br>
+        <div style="margin-top:10px;">
+          <button onclick="assignRandomColors()">Assign random colors to all values</button>
+        </div>
       </div>
       <div style='margin:10px; padding-top:20px; display: flex; flex-direction: column; justify-content: space-between;'>
         <div style="width:800px;"> Main data file URL <span class="taxoniumSpecific"> (optional, for direct display)</span>
@@ -150,7 +150,7 @@
             dataTypeSpanText = ": Distance matrix heatmap";
         } else if (lcUrl.endsWith(".nwk") || lcUrl.endsWith(".nhx")) {
             mainDataParamName = "treeUrl";
-            vizOptions = ["../Taxonium", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/"];
+            vizOptions = ["../myTOL?metaIdField=individual", "../Taxonium", "https://cov2tree-qiwrabrhp-theosanderson.vercel.app/", "https://taxonium.org/"];
             dataTypeSpanText = ": Tree viewer (Taxonium)";
         } else {
             Array.from(document.getElementsByClassName("taxoniumSpecific")).forEach(
@@ -249,18 +249,18 @@
         }
     }
 
-	function assignRandomColors() {
-	    const select = document.getElementById("stringSelector");
-	    if (!select) return;
+    function assignRandomColors() {
+        const select = document.getElementById("stringSelector");
+        if (!select) return;
 
-	    Array.from(select.options).forEach(option => {
-	        const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-	        assignments[option.value] = randomColor;
-	    });
+        Array.from(select.options).forEach(option => {
+            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            assignments[option.value] = randomColor;
+        });
 
-	    saveToLocalStorage(document.getElementById("mdSelectorForColor").value);
-	    updateSelectColors();
-	}
+        saveToLocalStorage(document.getElementById("mdSelectorForColor").value);
+        updateSelectColors();
+    }
 
 
     // Create the color picker instance
@@ -343,10 +343,16 @@
             }
         }
 
+        // Choose '?' or '&' depending on whether the target URL already
+        // contains a query string.
+        var targetUrl = document.getElementById("visualizationUrl").value;
+        var querySeparator = targetUrl.indexOf("?") === -1 ? "?" : "&";
+        var fullUrl = targetUrl + querySeparator + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams;
+
         if (document.getElementById('openInNewWindow').checked)
-            window.open(document.getElementById("visualizationUrl").value + "?" + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams);
+            window.open(fullUrl);
         else
-            location.href = document.getElementById("visualizationUrl").value + "?" + mainDataParamName + "=" + document.getElementById("dataUrl").value + mdUrlParams;
+            location.href = fullUrl;
     }
 
     function convertToRGB() {
